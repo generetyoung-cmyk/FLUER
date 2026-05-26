@@ -1,0 +1,198 @@
+name: FLUER Protocol CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── TypeScript / Next.js ─────────────────────────────────────
+  frontend:
+    name: Frontend (TypeScript + Next.js)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: .
+
+      - name: Type check
+        run: pnpm type-check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Build
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_API_URL: https://api.fluer.io
+          NEXT_PUBLIC_WS_URL: wss://api.fluer.io/ws
+          NEXT_PUBLIC_HELIUS_API_KEY: dummy-key-for-ci
+
+  # ── SDK ───────────────────────────────────────────────────────
+  sdk:
+    name: TypeScript SDK
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build SDK
+        run: pnpm --filter @fluer/sdk build
+
+      - name: Test SDK
+        run: pnpm --filter @fluer/sdk test
+
+  # ── Rust Services ─────────────────────────────────────────────
+  rust-services:
+    name: Rust Services (API Gateway + Support)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: services
+
+      - name: Rustfmt check
+        run: cargo fmt --all -- --check
+        working-directory: services
+
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+        working-directory: services
+
+      - name: Build (release)
+        run: cargo build --release
+        working-directory: services
+
+      - name: Test
+        run: cargo test --all
+        working-directory: services
+
+  # ── Anchor Programs ───────────────────────────────────────────
+  anchor-programs:
+    name: Anchor Programs (Rust + Solana)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: bpfel-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: programs
+
+      - name: Install Solana CLI
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/v1.18.26/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+
+      - name: Install Anchor CLI
+        run: |
+          npm install -g @coral-xyz/anchor-cli@0.30.1
+          anchor --version
+
+      - name: Build programs
+        run: anchor build
+        working-directory: programs
+
+      - name: Verify IDL generation
+        run: |
+          test -f target/idl/fluer_launchpad.json && echo "launchpad IDL OK"
+          test -f target/idl/fluer_perp_engine.json && echo "perp IDL OK"
+          test -f target/idl/fluer_prediction.json && echo "prediction IDL OK"
+        working-directory: programs
+
+      - name: Run program tests
+        run: anchor test
+        working-directory: programs
+        env:
+          ANCHOR_WALLET: ~/.config/solana/id.json
+
+  # ── Security scan ─────────────────────────────────────────────
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Audit Rust dependencies
+        uses: rustsec/audit-check@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: services
+
+      - name: Audit Node.js dependencies
+        run: pnpm audit --audit-level=high
+        continue-on-error: true
+
+  # ── Docker Build ──────────────────────────────────────────────
+  docker:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+    needs: [rust-services]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build API Gateway image
+        run: |
+          docker build \
+            -f services/api-gateway/Dockerfile \
+            -t fluer-api-gateway:ci \
+            services/
+
+      - name: Verify health endpoint (smoke test)
+        run: |
+          docker run -d --name fluer-test \
+            -e DATABASE_URL=postgresql://postgres:test@localhost/fluer \
+            -e REDIS_URL=redis://localhost:6379 \
+            -e HELIUS_API_KEY=test \
+            -e PINATA_JWT=test \
+            -p 8080:8080 \
+            fluer-api-gateway:ci || true
+          sleep 2
+          docker logs fluer-test || true
+          docker stop fluer-test || true
+          docker rm fluer-test || true

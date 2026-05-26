@@ -1,0 +1,28 @@
+[workspace]
+members = [
+    "fluer_launchpad",
+    "fluer_perp_engine",
+    "fluer_prediction",
+    "fluer_token",
+]
+resolver = "2"
+
+[workspace.dependencies]
+anchor-lang = { version = "0.30.1", features = ["init-if-needed"] }
+anchor-spl = { version = "0.30.1", features = ["token", "token_2022", "associated_token"] }
+solana-program = "1.18.26"
+spl-token = { version = "4.0.0", features = ["no-entrypoint"] }
+spl-token-2022 = { version = "3.0.4", features = ["no-entrypoint"] }
+spl-associated-token-account = { version = "3.0.4", features = ["no-entrypoint"] }
+pyth-solana-receiver-sdk = "0.4.0"
+mpl-token-metadata = "4.1.2"
+
+[profile.release]
+overflow-checks = true
+lto = "fat"
+codegen-units = 1
+
+[profile.release.build-override]
+opt-level = 3
+incremental = false
+codegen-units = 1

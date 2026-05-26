@@ -1,0 +1,33 @@
+{
+  "name": "fluer-protocol",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FLUER Protocol — Integrated Speculative Market Infrastructure for Solana",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "type-check": "turbo type-check",
+    "test": "turbo test",
+    "programs:build": "cd programs && anchor build",
+    "programs:test": "cd programs && anchor test",
+    "programs:deploy:devnet": "cd programs && anchor deploy --provider.cluster devnet",
+    "programs:deploy:mainnet": "cd programs && anchor deploy --provider.cluster mainnet",
+    "services:build": "cd services && cargo build --release",
+    "services:dev": "cd services && cargo run --bin api-gateway",
+    "vanity:generate": "cd services && cargo run --bin vanity-grinder"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0",
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.0"
+}

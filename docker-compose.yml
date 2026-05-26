@@ -1,0 +1,106 @@
+version: "3.9"
+
+# ── FLUER Protocol — Local Development Stack ──────────────────
+# Run: docker compose up -d
+# Then: pnpm dev (from repo root)
+
+services:
+
+  # ── PostgreSQL + TimescaleDB ───────────────────────────────
+  postgres:
+    image: timescale/timescaledb-ha:pg16-latest
+    container_name: fluer-postgres
+    environment:
+      POSTGRES_DB: fluer
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: fluerdev
+    ports:
+      - "5432:5432"
+    volumes:
+      - fluer_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fluer"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── Redis 7 ───────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: fluer-redis
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - fluer_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── API Gateway ────────────────────────────────────────────
+  api-gateway:
+    build:
+      context: ./services
+      dockerfile: api-gateway/Dockerfile
+    container_name: fluer-api-gateway
+    env_file: ./services/api-gateway/.env.example
+    environment:
+      DATABASE_URL: postgresql://postgres:fluerdev@postgres:5432/fluer
+      REDIS_URL: redis://redis:6379
+      BIND_ADDR: 0.0.0.0:8080
+      RUST_LOG: fluer_api=debug,tower_http=info
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ── Market Factory ─────────────────────────────────────────
+  market-factory:
+    build:
+      context: ./services
+      dockerfile: market-factory/Dockerfile
+    container_name: fluer-market-factory
+    env_file: ./services/api-gateway/.env.example
+    environment:
+      DATABASE_URL: postgresql://postgres:fluerdev@postgres:5432/fluer
+      REDIS_URL: redis://redis:6379
+      RUST_LOG: market_factory=info
+    depends_on:
+      - api-gateway
+
+  # ── Price Aggregator ───────────────────────────────────────
+  price-aggregator:
+    build:
+      context: ./services
+      dockerfile: price-aggregator/Dockerfile
+    container_name: fluer-price-aggregator
+    env_file: ./services/api-gateway/.env.example
+    environment:
+      DATABASE_URL: postgresql://postgres:fluerdev@postgres:5432/fluer
+      REDIS_URL: redis://redis:6379
+      RUST_LOG: price_aggregator=info
+    depends_on:
+      - api-gateway
+
+  # ── Next.js Web App (optional — use pnpm dev for hot reload) ─
+  # web:
+  #   build:
+  #     context: ./apps/web
+  #   container_name: fluer-web
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - api-gateway
+
+volumes:
+  fluer_postgres_data:
+  fluer_redis_data:
+
+networks:
+  default:
+    name: fluer-network

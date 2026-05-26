@@ -1,0 +1,173 @@
+{
+  "version": "1.0.0",
+  "name": "fluer_launchpad",
+  "metadata": {
+    "address": "FLUERLnchPdxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "origin": "anchor"
+  },
+  "instructions": [
+    {
+      "name": "initialize",
+      "accounts": [
+        { "name": "authority", "isMut": true, "isSigner": true },
+        { "name": "config", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "InitializeParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "createToken",
+      "accounts": [
+        { "name": "creator", "isMut": true, "isSigner": true },
+        { "name": "config", "isMut": true, "isSigner": false },
+        { "name": "mint", "isMut": true, "isSigner": true },
+        { "name": "listing", "isMut": true, "isSigner": false },
+        { "name": "bondingCurveVault", "isMut": true, "isSigner": false },
+        { "name": "creatorFluerAccount", "isMut": true, "isSigner": false },
+        { "name": "treasuryFluerAccount", "isMut": true, "isSigner": false },
+        { "name": "creatorProfile", "isMut": true, "isSigner": false },
+        { "name": "creatorTokenAccount", "isMut": true, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "associatedTokenProgram", "isMut": false, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false },
+        { "name": "rent", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": { "defined": "CreateTokenParams" }
+        }
+      ]
+    },
+    {
+      "name": "buyOnCurve",
+      "accounts": [
+        { "name": "buyer", "isMut": true, "isSigner": true },
+        { "name": "config", "isMut": false, "isSigner": false },
+        { "name": "listing", "isMut": true, "isSigner": false },
+        { "name": "mint", "isMut": false, "isSigner": false },
+        { "name": "bondingCurveVault", "isMut": true, "isSigner": false },
+        { "name": "buyerTokenAccount", "isMut": true, "isSigner": false },
+        { "name": "treasury", "isMut": true, "isSigner": false },
+        { "name": "creatorAccount", "isMut": true, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "associatedTokenProgram", "isMut": false, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "solAmount", "type": "u64" },
+        { "name": "minTokensOut", "type": "u64" }
+      ]
+    },
+    {
+      "name": "sellOnCurve",
+      "accounts": [
+        { "name": "seller", "isMut": true, "isSigner": true },
+        { "name": "config", "isMut": false, "isSigner": false },
+        { "name": "listing", "isMut": true, "isSigner": false },
+        { "name": "mint", "isMut": true, "isSigner": false },
+        { "name": "bondingCurveVault", "isMut": true, "isSigner": false },
+        { "name": "sellerTokenAccount", "isMut": true, "isSigner": false },
+        { "name": "treasury", "isMut": true, "isSigner": false },
+        { "name": "creatorAccount", "isMut": true, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "tokenAmount", "type": "u64" },
+        { "name": "minSolOut", "type": "u64" }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "LaunchpadConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "authority", "type": "publicKey" },
+          { "name": "fluerMint", "type": "publicKey" },
+          { "name": "treasuryWallet", "type": "publicKey" },
+          { "name": "solUsdOracle", "type": "publicKey" },
+          { "name": "creationFeeFluer", "type": "u64" },
+          { "name": "platformFeeBps", "type": "u16" },
+          { "name": "graduationMarketCapUsdScaled", "type": "u64" },
+          { "name": "paused", "type": "bool" },
+          { "name": "totalTokensCreated", "type": "u64" },
+          { "name": "totalVolumelamports", "type": "u64" },
+          { "name": "totalGraduated", "type": "u64" },
+          { "name": "bump", "type": "u8" }
+        ]
+      }
+    },
+    {
+      "name": "TokenListing",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "mint", "type": "publicKey" },
+          { "name": "creator", "type": "publicKey" },
+          { "name": "virtualSolReserves", "type": "u64" },
+          { "name": "virtualTokenReserves", "type": "u64" },
+          { "name": "realSolReserves", "type": "u64" },
+          { "name": "tokensSold", "type": "u64" },
+          { "name": "holderCount", "type": "u32" },
+          { "name": "buyCount", "type": "u64" },
+          { "name": "sellCount", "type": "u64" },
+          { "name": "createdAt", "type": "i64" },
+          { "name": "graduated", "type": "bool" },
+          { "name": "graduatedAt", "type": "i64" },
+          { "name": "creatorRewardsLamports", "type": "u64" },
+          { "name": "bump", "type": "u8" }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "TokenCreatedEvent",
+      "fields": [
+        { "name": "mint", "type": "publicKey", "index": true },
+        { "name": "creator", "type": "publicKey", "index": false },
+        { "name": "name", "type": "string", "index": false },
+        { "name": "symbol", "type": "string", "index": false },
+        { "name": "timestamp", "type": "i64", "index": false }
+      ]
+    },
+    {
+      "name": "CurveTradeEvent",
+      "fields": [
+        { "name": "mint", "type": "publicKey", "index": true },
+        { "name": "solAmount", "type": "u64", "index": false },
+        { "name": "tokenAmount", "type": "u64", "index": false },
+        { "name": "realSolReserves", "type": "u64", "index": false },
+        { "name": "trader", "type": "publicKey", "index": true },
+        { "name": "timestamp", "type": "i64", "index": false }
+      ]
+    },
+    {
+      "name": "GraduationEvent",
+      "fields": [
+        { "name": "mint", "type": "publicKey", "index": true },
+        { "name": "creator", "type": "publicKey", "index": false },
+        { "name": "realSolRaised", "type": "u64", "index": false },
+        { "name": "timestamp", "type": "i64", "index": false }
+      ]
+    }
+  ],
+  "errors": [
+    { "code": 6000, "name": "InvalidNameSuffix", "msg": "Token name must end with ' · FLUER'" },
+    { "code": 6001, "name": "NameTooLong", "msg": "Token name too long" },
+    { "code": 6002, "name": "SlippageExceeded", "msg": "Slippage exceeded" },
+    { "code": 6003, "name": "CurveGraduated", "msg": "Bonding curve is graduated" },
+    { "code": 6004, "name": "AntiBotMaxPurchaseExceeded", "msg": "Anti-snipe: max purchase exceeded" },
+    { "code": 6005, "name": "ProgramPaused", "msg": "Program is paused" }
+  ]
+}

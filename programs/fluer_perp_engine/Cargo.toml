@@ -1,0 +1,21 @@
+[package]
+name = "fluer_perp_engine"
+version = "1.0.0"
+description = "FLUER Protocol — Perpetual Market Engine (vAMM)"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "fluer_perp_engine"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = { workspace = true }
+anchor-spl = { workspace = true }
+pyth-solana-receiver-sdk = { workspace = true }

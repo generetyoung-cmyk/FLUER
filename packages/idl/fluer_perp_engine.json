@@ -1,0 +1,150 @@
+{
+  "version": "1.0.0",
+  "name": "fluer_perp_engine",
+  "metadata": {
+    "address": "FLUERPerpEngnxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  "instructions": [
+    {
+      "name": "createMarket",
+      "accounts": [
+        { "name": "authority", "isMut": true, "isSigner": true },
+        { "name": "config", "isMut": false, "isSigner": false },
+        { "name": "market", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "params", "type": { "defined": "CreateMarketParams" } }
+      ]
+    },
+    {
+      "name": "openPosition",
+      "accounts": [
+        { "name": "trader", "isMut": true, "isSigner": true },
+        { "name": "config", "isMut": false, "isSigner": false },
+        { "name": "market", "isMut": true, "isSigner": false },
+        { "name": "position", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "params", "type": { "defined": "OpenPositionParams" } }
+      ]
+    },
+    {
+      "name": "closePosition",
+      "accounts": [
+        { "name": "trader", "isMut": true, "isSigner": true },
+        { "name": "config", "isMut": false, "isSigner": false },
+        { "name": "market", "isMut": true, "isSigner": false },
+        { "name": "position", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "minUsdcOut", "type": "u64" }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "PerpMarket",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "baseMint", "type": "publicKey" },
+          { "name": "tier", "type": { "defined": "MarketTier" } },
+          { "name": "baseAssetReserve", "type": "u64" },
+          { "name": "quoteAssetReserve", "type": "u64" },
+          { "name": "longOpenInterest", "type": "u64" },
+          { "name": "shortOpenInterest", "type": "u64" },
+          { "name": "oracle", "type": "publicKey" },
+          { "name": "lastIndexPrice", "type": "u64" },
+          { "name": "lastMarkPrice", "type": "u64" },
+          { "name": "cumulativeLongFunding", "type": "i128" },
+          { "name": "cumulativeShortFunding", "type": "i128" },
+          { "name": "lastFundingTime", "type": "i64" },
+          { "name": "hourlyFundingRate", "type": "i64" },
+          { "name": "active", "type": "bool" },
+          { "name": "bump", "type": "u8" }
+        ]
+      }
+    },
+    {
+      "name": "Position",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "trader", "type": "publicKey" },
+          { "name": "market", "type": "publicKey" },
+          { "name": "side", "type": { "defined": "PositionSide" } },
+          { "name": "baseAmount", "type": "u64" },
+          { "name": "notionalUsdc", "type": "u64" },
+          { "name": "collateralUsdc", "type": "u64" },
+          { "name": "leverage", "type": "u8" },
+          { "name": "entryPrice", "type": "u64" },
+          { "name": "liquidationPrice", "type": "u64" },
+          { "name": "fundingRateAtOpen", "type": "i128" },
+          { "name": "fundingPnl", "type": "i64" },
+          { "name": "openedAt", "type": "i64" },
+          { "name": "bump", "type": "u8" }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "MarketTier",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          { "name": "Tier1" },
+          { "name": "Tier2" },
+          { "name": "Tier3" }
+        ]
+      }
+    },
+    {
+      "name": "PositionSide",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          { "name": "Long" },
+          { "name": "Short" }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "PositionOpenedEvent",
+      "fields": [
+        { "name": "trader", "type": "publicKey", "index": true },
+        { "name": "market", "type": "publicKey", "index": true },
+        { "name": "side", "type": { "defined": "PositionSide" }, "index": false },
+        { "name": "baseAmount", "type": "u64", "index": false },
+        { "name": "notionalUsdc", "type": "u64", "index": false },
+        { "name": "leverage", "type": "u8", "index": false },
+        { "name": "entryPrice", "type": "u64", "index": false },
+        { "name": "liquidationPrice", "type": "u64", "index": false },
+        { "name": "timestamp", "type": "i64", "index": false }
+      ]
+    },
+    {
+      "name": "PositionClosedEvent",
+      "fields": [
+        { "name": "trader", "type": "publicKey", "index": true },
+        { "name": "market", "type": "publicKey", "index": true },
+        { "name": "realizedPnl", "type": "i64", "index": false },
+        { "name": "returnUsdc", "type": "u64", "index": false },
+        { "name": "timestamp", "type": "i64", "index": false }
+      ]
+    }
+  ],
+  "errors": [
+    { "code": 6000, "name": "Paused", "msg": "Program is paused" },
+    { "code": 6001, "name": "MarketInactive", "msg": "Market is not active" },
+    { "code": 6002, "name": "LeverageTooHigh", "msg": "Leverage exceeds maximum" },
+    { "code": 6003, "name": "InsufficientCollateral", "msg": "Insufficient collateral" },
+    { "code": 6004, "name": "SlippageExceeded", "msg": "Slippage exceeded" },
+    { "code": 6005, "name": "NotLiquidatable", "msg": "Position not liquidatable" }
+  ]
+}

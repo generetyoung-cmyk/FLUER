@@ -1,0 +1,145 @@
+{
+  "version": "1.0.0",
+  "name": "fluer_prediction",
+  "metadata": {
+    "address": "FLUERPredctMrktxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  "instructions": [
+    {
+      "name": "initialize",
+      "accounts": [
+        { "name": "authority", "isMut": true, "isSigner": true },
+        { "name": "config", "isMut": true, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "params", "type": { "defined": "InitPredConfigParams" } }
+      ]
+    },
+    {
+      "name": "createMarket",
+      "accounts": [
+        { "name": "creator", "isMut": true, "isSigner": true },
+        { "name": "config", "isMut": false, "isSigner": false },
+        { "name": "tokenMint", "isMut": false, "isSigner": false },
+        { "name": "market", "isMut": true, "isSigner": false },
+        { "name": "creatorFluer", "isMut": true, "isSigner": false },
+        { "name": "treasuryFluer", "isMut": true, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "associatedTokenProgram", "isMut": false, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "params", "type": { "defined": "CreateMarketParams" } }
+      ]
+    },
+    {
+      "name": "placeBet",
+      "accounts": [
+        { "name": "bettor", "isMut": true, "isSigner": true },
+        { "name": "config", "isMut": false, "isSigner": false },
+        { "name": "market", "isMut": true, "isSigner": false },
+        { "name": "position", "isMut": true, "isSigner": false },
+        { "name": "bettorUsdc", "isMut": true, "isSigner": false },
+        { "name": "marketVault", "isMut": true, "isSigner": false },
+        { "name": "usdcMint", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "associatedTokenProgram", "isMut": false, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "isYes", "type": "bool" },
+        { "name": "amountUsdc", "type": "u64" },
+        { "name": "minShares", "type": "u64" }
+      ]
+    },
+    {
+      "name": "resolveMarket",
+      "accounts": [
+        { "name": "authority", "isMut": false, "isSigner": true },
+        { "name": "config", "isMut": false, "isSigner": false },
+        { "name": "market", "isMut": true, "isSigner": false }
+      ],
+      "args": [
+        { "name": "outcome", "type": { "defined": "Resolution" } }
+      ]
+    },
+    {
+      "name": "claimWinnings",
+      "accounts": [
+        { "name": "bettor", "isMut": true, "isSigner": true },
+        { "name": "config", "isMut": false, "isSigner": false },
+        { "name": "market", "isMut": false, "isSigner": false },
+        { "name": "position", "isMut": true, "isSigner": false },
+        { "name": "marketVault", "isMut": true, "isSigner": false },
+        { "name": "bettorUsdc", "isMut": true, "isSigner": false },
+        { "name": "treasuryUsdc", "isMut": true, "isSigner": false },
+        { "name": "creator", "isMut": true, "isSigner": false },
+        { "name": "usdcMint", "isMut": false, "isSigner": false },
+        { "name": "tokenProgram", "isMut": false, "isSigner": false },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": []
+    }
+  ],
+  "types": [
+    {
+      "name": "Resolution",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          { "name": "Pending" },
+          { "name": "Yes" },
+          { "name": "No" },
+          { "name": "Void" }
+        ]
+      }
+    },
+    {
+      "name": "MarketType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          { "name": "PriceTarget" },
+          { "name": "HolderGrowth" },
+          { "name": "VolumeThreshold" },
+          { "name": "ExchangeListing" },
+          { "name": "Custom" }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "BetPlacedEvent",
+      "fields": [
+        { "name": "market", "type": "publicKey", "index": true },
+        { "name": "bettor", "type": "publicKey", "index": true },
+        { "name": "isYes", "type": "bool", "index": false },
+        { "name": "amountUsdc", "type": "u64", "index": false },
+        { "name": "yesPool", "type": "u64", "index": false },
+        { "name": "noPool", "type": "u64", "index": false },
+        { "name": "timestamp", "type": "i64", "index": false }
+      ]
+    },
+    {
+      "name": "MarketResolvedEvent",
+      "fields": [
+        { "name": "market", "type": "publicKey", "index": true },
+        { "name": "resolution", "type": { "defined": "Resolution" }, "index": false },
+        { "name": "yesPool", "type": "u64", "index": false },
+        { "name": "noPool", "type": "u64", "index": false },
+        { "name": "timestamp", "type": "i64", "index": false }
+      ]
+    }
+  ],
+  "errors": [
+    { "code": 6000, "name": "Paused", "msg": "Program is paused" },
+    { "code": 6001, "name": "MarketClosed", "msg": "Market is closed" },
+    { "code": 6002, "name": "MarketExpired", "msg": "Market has expired" },
+    { "code": 6003, "name": "BetTooSmall", "msg": "Bet amount below minimum" },
+    { "code": 6004, "name": "SlippageExceeded", "msg": "Slippage exceeded" },
+    { "code": 6005, "name": "AlreadyClaimed", "msg": "Winnings already claimed" },
+    { "code": 6006, "name": "MarketNotResolved", "msg": "Market not resolved yet" }
+  ]
+}

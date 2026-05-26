@@ -1,0 +1,24 @@
+[package]
+name = "fluer_launchpad"
+version = "1.0.0"
+description = "FLUER Protocol — Launchpad Program with Bonding Curve"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "fluer_launchpad"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = { workspace = true }
+anchor-spl = { workspace = true }
+solana-program = { workspace = true }
+spl-token-2022 = { workspace = true }
+mpl-token-metadata = { workspace = true }
+pyth-solana-receiver-sdk = { workspace = true }

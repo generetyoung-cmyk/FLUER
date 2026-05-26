@@ -1,0 +1,329 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── FLUER Design System — Global Styles ─────────────────────── */
+
+@layer base {
+  :root {
+    /* Core design tokens */
+    --bg-base: #0A0A0B;
+    --bg-elevated: #111114;
+    --bg-raised: #18181D;
+    --bg-input: #1E1E25;
+    --bg-hover: #22222B;
+
+    --border-subtle: #1F1F28;
+    --border-default: #2A2A38;
+    --border-strong: #3A3A4A;
+
+    --text-primary: #F4F4F6;
+    --text-secondary: #8B8B99;
+    --text-tertiary: #52525F;
+
+    --accent-primary: #7C5CFC;
+    --accent-hover: #8B6DFF;
+
+    --positive: #22C55E;
+    --negative: #EF4444;
+    --warning: #F59E0B;
+    --info: #3B82F6;
+
+    /* Sidebar widths */
+    --sidebar-width: 240px;
+    --panel-width: 320px;
+    --header-height: 48px;
+    --market-bar-height: 40px;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font-inter, Inter, system-ui, sans-serif);
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  /* Scrollbar styling — thin, dark */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4A4A5A;
+  }
+
+  /* Selection */
+  ::selection {
+    background: rgba(124, 92, 252, 0.25);
+    color: var(--text-primary);
+  }
+
+  /* Input resets */
+  input, textarea, select {
+    background: var(--bg-input);
+    color: var(--text-primary);
+    border: 1px solid var(--border-default);
+    outline: none;
+    font-family: inherit;
+  }
+
+  input:focus, textarea:focus {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(124, 92, 252, 0.15);
+  }
+
+  /* Remove number input spinners */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] { -moz-appearance: textfield; }
+}
+
+@layer components {
+  /* ── Layout ─────────────────────────────────────────── */
+
+  .fluer-layout {
+    display: grid;
+    grid-template-rows: var(--header-height) 1fr;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .fluer-trade-layout {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr var(--panel-width);
+    grid-template-rows: var(--market-bar-height) 1fr auto;
+    height: calc(100dvh - var(--header-height));
+    overflow: hidden;
+  }
+
+  /* ── Typography ─────────────────────────────────────── */
+
+  .font-display { font-family: var(--font-geist-sans, Inter, system-ui); }
+  .font-mono { font-family: var(--font-geist-mono, 'JetBrains Mono', monospace); }
+
+  .label-xs {
+    @apply text-xs text-text-secondary font-medium uppercase tracking-wider;
+  }
+
+  .label-sm {
+    @apply text-sm text-text-secondary font-medium;
+  }
+
+  /* ── Price display ──────────────────────────────────── */
+
+  .price-positive { @apply text-positive font-mono font-semibold; }
+  .price-negative { @apply text-negative font-mono font-semibold; }
+  .price-neutral  { @apply text-text-secondary font-mono; }
+
+  .price-flash-up {
+    animation: priceFlashUp 0.4s ease-out;
+  }
+  .price-flash-down {
+    animation: priceFlashDown 0.4s ease-out;
+  }
+
+  /* ── Buttons ────────────────────────────────────────── */
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md font-medium
+           transition-all duration-150 cursor-pointer select-none;
+    @apply disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-accent-primary text-white hover:bg-accent-hover;
+    @apply active:scale-[0.98] text-md px-5 py-2.5;
+  }
+
+  .btn-secondary {
+    @apply btn border border-border-default text-text-primary hover:bg-bg-hover;
+    @apply text-md px-4 py-2;
+  }
+
+  .btn-ghost {
+    @apply btn text-text-secondary hover:text-text-primary hover:bg-bg-hover;
+    @apply text-sm px-3 py-1.5;
+  }
+
+  .btn-long {
+    @apply btn bg-positive/90 hover:bg-positive text-white font-semibold;
+    @apply w-full py-3 text-md;
+  }
+
+  .btn-short {
+    @apply btn bg-negative/90 hover:bg-negative text-white font-semibold;
+    @apply w-full py-3 text-md;
+  }
+
+  .btn-danger {
+    @apply btn bg-negative text-white hover:bg-red-500;
+    @apply text-sm px-3 py-1.5;
+  }
+
+  /* ── Cards / Panels ─────────────────────────────────── */
+
+  .panel {
+    @apply bg-bg-elevated border border-border-default;
+  }
+
+  .card {
+    @apply bg-bg-elevated border border-border-default rounded-lg p-4;
+  }
+
+  /* ── Table ──────────────────────────────────────────── */
+
+  .data-table {
+    @apply w-full text-sm;
+  }
+
+  .data-table th {
+    @apply text-text-tertiary font-medium text-xs uppercase tracking-wider
+           py-2 px-3 text-left border-b border-border-subtle sticky top-0 bg-bg-elevated;
+  }
+
+  .data-table td {
+    @apply py-2 px-3 border-b border-border-subtle font-mono text-sm;
+  }
+
+  .data-table tr:hover td {
+    @apply bg-bg-hover cursor-pointer;
+  }
+
+  /* ── Skeleton loading ───────────────────────────────── */
+
+  .skeleton {
+    @apply bg-bg-hover rounded;
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255,255,255,0.03) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* ── Badges ─────────────────────────────────────────── */
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-xs font-medium;
+  }
+
+  .badge-accent { @apply badge bg-accent-muted text-accent-primary; }
+  .badge-positive { @apply badge bg-bg-positive text-positive; }
+  .badge-negative { @apply badge bg-bg-negative text-negative; }
+  .badge-warning { @apply badge bg-bg-warning text-warning; }
+  .badge-neutral { @apply badge bg-bg-raised text-text-secondary; }
+
+  /* ── Input field ────────────────────────────────────── */
+
+  .input-field {
+    @apply w-full bg-bg-input border border-border-default rounded-md
+           px-3 py-2 text-text-primary text-sm font-mono
+           focus:border-accent-primary focus:ring-2 focus:ring-accent-muted
+           placeholder:text-text-tertiary transition-colors;
+  }
+
+  /* ── Live dot ───────────────────────────────────────── */
+
+  .live-dot {
+    @apply w-1.5 h-1.5 rounded-full bg-positive;
+    animation: blink 1.2s step-end infinite;
+  }
+
+  /* ── Divider ────────────────────────────────────────── */
+
+  .divider { @apply border-t border-border-subtle; }
+
+  /* ── Tooltip ────────────────────────────────────────── */
+
+  .tooltip {
+    @apply absolute z-50 bg-bg-raised border border-border-default
+           rounded-md px-2 py-1 text-xs text-text-primary shadow-elevated
+           pointer-events-none whitespace-nowrap;
+  }
+}
+
+/* ── Animations ─────────────────────────────────────────────── */
+
+@keyframes priceFlashUp {
+  0% { color: var(--positive); background: rgba(34,197,94,0.15); }
+  100% { color: inherit; background: transparent; }
+}
+
+@keyframes priceFlashDown {
+  0% { color: var(--negative); background: rgba(239,68,68,0.15); }
+  100% { color: inherit; background: transparent; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ── TradingView chart overrides ────────────────────────────── */
+
+.tv-chart-container {
+  width: 100%;
+  height: 100%;
+}
+
+.tv-chart-container canvas {
+  border-radius: 0;
+}
+
+/* ── Wallet adapter overrides ───────────────────────────────── */
+
+.wallet-adapter-modal-wrapper {
+  background: var(--bg-raised) !important;
+  border: 1px solid var(--border-default) !important;
+  border-radius: 12px !important;
+}
+
+.wallet-adapter-modal-title {
+  color: var(--text-primary) !important;
+  font-family: var(--font-geist-sans) !important;
+}
+
+.wallet-adapter-button {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border-default) !important;
+  color: var(--text-primary) !important;
+  border-radius: 8px !important;
+  transition: all 0.15s !important;
+}
+
+.wallet-adapter-button:hover {
+  background: var(--bg-hover) !important;
+  border-color: var(--border-strong) !important;
+}
