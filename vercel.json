@@ -36,5 +36,4 @@
     "NEXT_PUBLIC_API_URL": "https://api.fluer.io",
     "NEXT_PUBLIC_WS_URL": "wss://api.fluer.io/ws"
   },
-  "regions": ["sin1", "iad1", "fra1"]
 }
