@@ -1,8 +1,4 @@
 {
-  "buildCommand": "cd apps/web && pnpm build",
-  "outputDirectory": "apps/web/.next",
-  "installCommand": "pnpm install",
-  "framework": "nextjs",
   "rewrites": [
     {
       "source": "/api/v1/:path*",
@@ -31,9 +27,5 @@
         }
       ]
     }
-  ],
-  "env": {
-    "NEXT_PUBLIC_API_URL": "https://api.fluer.io",
-    "NEXT_PUBLIC_WS_URL": "wss://api.fluer.io/ws"
-  },
+  ]
 }
