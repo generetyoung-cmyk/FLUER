@@ -1,4 +1,6 @@
 {
+  "installCommand": "corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install",
+
   "rewrites": [
     {
       "source": "/api/v1/:path*",
@@ -9,6 +11,7 @@
       "destination": "https://api.fluer.io/ws"
     }
   ],
+
   "headers": [
     {
       "source": "/(.*)",
